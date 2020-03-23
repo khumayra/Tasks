@@ -5,6 +5,7 @@ import automation.utilities.DriverFactory;
 import java.util.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
@@ -24,7 +25,8 @@ public class WebTable {
     private By column3By = By.xpath("//table[1]//tr//td[3]");
     private By lastNameBy = By.xpath("//table[1]//tr//td[1]");
     private By firstNameBy = By.xpath("//table[1]//tr//td[2]");
-
+    private By headerBy = By.xpath("//table[1]//th");
+    private By deleteBy = By.xpath("//table[1]//a[@href='#delete']");
 
     @Test (description = "find all data from row 2")
     public void test1(){
@@ -56,6 +58,34 @@ public class WebTable {
         List<String> actual =BrowserUtils.printWebElementsText(driver.findElements(By.xpath("//table[1]//tr["+index+"]//td")));
         List <String> expected = new ArrayList<>(Arrays.asList("Doe","Jason","jdoe@hotmail.com","$100.00","http://www.jdoe.com","edit delete"));
         Assert.assertEquals(actual,expected);
+    }
+    @Test(description = "return column index by column name : first name")
+    public void test4(){
+        List<String> headers=BrowserUtils.printWebElementsText(driver.findElements(headerBy));
+        int index=0;
+        BrowserUtils.wait(5);
+        for (int i=0; i< headers.size();i++) {
+            if (headers.get(i).equalsIgnoreCase("first name")) {
+                index = i + 1;
+            }
+        }
+            BrowserUtils.wait(5);
+            List<String> actual = BrowserUtils.printWebElementsText(driver.findElements(By.xpath("//table[1]//td["+index+"]")));////table[1]//td[2]
+            List<String> expected=new ArrayList<>(Arrays.asList("John","Frank","Jason","Tim"));
+            Assert.assertEquals(actual,expected);
+        }
+
+    @Test (description ="delete all records from table 1 and verify that all records are deleted")
+    public void test5(){
+        List<WebElement> links = driver.findElements(deleteBy);
+
+        for (int i = 0; i <links.size() ; i++) {
+            links.get(i).click();
+            --i;
+            links = driver.findElements(deleteBy);
+        }
+        System.out.println(BrowserUtils.printWebElementsText(links));
+        Assert.assertTrue(links.isEmpty());
     }
 
     @BeforeMethod
